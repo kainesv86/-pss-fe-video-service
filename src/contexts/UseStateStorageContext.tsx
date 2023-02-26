@@ -55,7 +55,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
 
   React.useEffect(() => {
     axios
-      .get('http://localhost:3000/api/setCookie')
+      .get(`${REACT_APP_URL_NEXT_APP}/api/setCookie`)
       .then(res => {
         console.log(res.data);
         const cookies = new Cookies();

@@ -10,6 +10,8 @@ import Room from './components/Room/Room';
 
 import useHeight from './hooks/useHeight/useHeight';
 import useRoomState from './hooks/useRoomState/useRoomState';
+import TreatmentModal from './components/TreatmentModal/TreatmentModal';
+import { useStateStorageContext } from './contexts';
 
 const Container = styled('div')({
   display: 'grid',
@@ -35,6 +37,8 @@ export default function App() {
   // will look good on mobile browsers even after the location bar opens or closes.
   const height = useHeight();
 
+  const { user } = useStateStorageContext();
+
   return (
     <Container style={{ height }}>
       {roomState === 'disconnected' ? (
@@ -46,6 +50,7 @@ export default function App() {
           <MobileTopMenuBar />
           <Room />
           <MenuBar />
+          {user.userType === 'doctor' ? <TreatmentModal /> : <></>}
         </Main>
       )}
     </Container>

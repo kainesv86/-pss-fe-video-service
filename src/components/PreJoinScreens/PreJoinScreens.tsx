@@ -3,9 +3,9 @@ import DeviceSelectionScreen from './DeviceSelectionScreen/DeviceSelectionScreen
 import IntroContainer from '../IntroContainer/IntroContainer';
 import MediaErrorSnackbar from './MediaErrorSnackbar/MediaErrorSnackbar';
 import RoomNameScreen from './RoomNameScreen/RoomNameScreen';
-import { useAppState } from '../../state';
 import { useParams } from 'react-router-dom';
 import useVideoContext from '../../hooks/useVideoContext/useVideoContext';
+import { useStateStorageContext } from '../../contexts';
 
 export enum Steps {
   roomNameStep,
@@ -13,24 +13,26 @@ export enum Steps {
 }
 
 export default function PreJoinScreens() {
-  const { user } = useAppState();
+  // const { user } = useAppState();
   const { getAudioAndVideoTracks } = useVideoContext();
   const { URLRoomName } = useParams<{ URLRoomName?: string }>();
   const [step, setStep] = useState(Steps.roomNameStep);
 
-  const [name, setName] = useState<string>(user?.displayName || '');
+  const [name, setName] = useState<string>('');
   const [roomName, setRoomName] = useState<string>('');
 
   const [mediaError, setMediaError] = useState<Error>();
+  const { user } = useStateStorageContext();
 
   useEffect(() => {
     if (URLRoomName) {
       setRoomName(URLRoomName);
-      if (user?.displayName) {
-        setStep(Steps.deviceSelectionStep);
-      }
     }
-  }, [user, URLRoomName]);
+  }, [URLRoomName]);
+
+  useEffect(() => {
+    setName(`${user.id}-${user.name}`);
+  }, [user]);
 
   useEffect(() => {
     if (step === Steps.deviceSelectionStep && !mediaError) {
@@ -44,10 +46,17 @@ export default function PreJoinScreens() {
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const userTypeURL = user.userType === 'doctor' ? '/doctor' : '';
+
     // If this app is deployed as a twilio function, don't change the URL because routing isn't supported.
     // @ts-ignore
     if (!window.location.origin.includes('twil.io') && !window.STORYBOOK_ENV) {
-      window.history.replaceState(null, '', window.encodeURI(`/room/${roomName}${window.location.search || ''}`));
+      window.history.replaceState(
+        null,
+        '',
+        window.encodeURI(`/room/${roomName}${window.location.search || ''}${userTypeURL}`)
+      );
     }
     setStep(Steps.deviceSelectionStep);
   };

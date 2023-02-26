@@ -14,6 +14,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import { useKrispToggle } from '../../../hooks/useKrispToggle/useKrispToggle';
 import SmallCheckIcon from '../../../icons/SmallCheckIcon';
 import InfoIconOutlined from '../../../icons/InfoIconOutlined';
+import { useStateStorageContext } from '../../../contexts';
 
 const useStyles = makeStyles((theme: Theme) => ({
   gutterBottom: {
@@ -82,6 +83,7 @@ export default function DeviceSelectionScreen({ name, roomName, setStep }: Devic
   const { connect: videoConnect, isAcquiringLocalTracks, isConnecting } = useVideoContext();
   const { toggleKrisp } = useKrispToggle();
   const disableButtons = isFetching || isAcquiringLocalTracks || isConnecting;
+  const { user } = useStateStorageContext();
 
   const handleJoin = () => {
     getToken(name, roomName).then(({ token }) => {
@@ -114,7 +116,7 @@ export default function DeviceSelectionScreen({ name, roomName, setStep }: Devic
       <Grid container justifyContent="center">
         <Grid item md={7} sm={12} xs={12}>
           <div className={classes.localPreviewContainer}>
-            <LocalVideoPreview identity={name} />
+            <LocalVideoPreview identity={user.userType === 'doctor' ? user.name : 'Anonymous'} />
           </div>
           <div className={classes.mobileButtonBar}>
             <Hidden mdUp>

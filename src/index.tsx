@@ -18,6 +18,9 @@ import { VideoProvider } from './components/VideoProvider';
 import useConnectionOptions from './utils/useConnectionOptions/useConnectionOptions';
 import UnsupportedBrowserWarning from './components/UnsupportedBrowserWarning/UnsupportedBrowserWarning';
 
+import { StateStorageProvider } from './contexts';
+import { ModalProvider } from './contexts/ModalContext';
+
 const VideoApp = () => {
   const { error, setError } = useAppState();
   const connectionOptions = useConnectionOptions();
@@ -41,11 +44,20 @@ export const ReactApp = () => (
       <Router>
         <AppStateProvider>
           <Switch>
-            <PrivateRoute exact path="/">
+            {/* <PrivateRoute exact path="/">
               <VideoApp />
+            </PrivateRoute> */}
+            <PrivateRoute path="/room/:URLRoomName/doctor">
+              <StateStorageProvider userType={'doctor'}>
+                <ModalProvider>
+                  <VideoApp />
+                </ModalProvider>
+              </StateStorageProvider>
             </PrivateRoute>
             <PrivateRoute path="/room/:URLRoomName">
-              <VideoApp />
+              <StateStorageProvider userType={'student'}>
+                <VideoApp />
+              </StateStorageProvider>
             </PrivateRoute>
             <Route path="/login">
               <LoginPage />

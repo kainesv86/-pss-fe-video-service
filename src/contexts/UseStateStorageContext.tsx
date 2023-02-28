@@ -37,6 +37,7 @@ export interface Doctor extends User {
   updateAt: string;
 }
 
+const REACT_APP_URL_SET_COOKIE = process.env.REACT_APP_URL_SET_COOKIE || 'http://localhost:3000/api/set-cookie';
 const REACT_APP_URL_NEXT_APP = process.env.REACT_APP_URL_NEXT_APP || 'http://localhost:3000';
 
 export const StateStorageContext = React.createContext<IStateStorage<any>>({
@@ -55,7 +56,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
 
   React.useEffect(() => {
     axios
-      .get(`${REACT_APP_URL_NEXT_APP}/api/setCookie`)
+      .get(`${REACT_APP_URL_SET_COOKIE}`)
       .then(res => {
         console.log(res.data);
         const cookies = new Cookies();

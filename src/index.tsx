@@ -20,6 +20,9 @@ import UnsupportedBrowserWarning from './components/UnsupportedBrowserWarning/Un
 
 import { StateStorageProvider } from './contexts';
 import { ModalProvider } from './contexts/ModalContext';
+import { ToastContainer } from 'react-toastify';
+
+const REACT_APP_URL_NEXT_APP = process.env.REACT_APP_URL_NEXT_APP || 'http://localhost:3000';
 
 const VideoApp = () => {
   const { error, setError } = useAppState();
@@ -62,11 +65,17 @@ export const ReactApp = () => (
             <Route path="/login">
               <LoginPage />
             </Route>
-            <Redirect to="/" />
+            <Route path="/">
+              {() => {
+                window.location.href = REACT_APP_URL_NEXT_APP;
+                return null;
+              }}
+            </Route>
           </Switch>
         </AppStateProvider>
       </Router>
     </UnsupportedBrowserWarning>
+    <ToastContainer />
   </MuiThemeProvider>
 );
 

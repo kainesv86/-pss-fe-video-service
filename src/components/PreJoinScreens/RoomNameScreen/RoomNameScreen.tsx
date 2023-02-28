@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     [theme.breakpoints.down('sm')]: {
       width: '100%',
     },
+    marginLeft: '4px',
   },
 }));
 
@@ -58,7 +59,7 @@ export default function RoomNameScreen({ name, roomName, setName, setRoomName, h
       <form onSubmit={handleSubmit}>
         <div className={classes.inputContainer}>
           {!hasUsername && (
-            <div className={classes.textFieldContainer}>
+            <div className={classes.textFieldContainer} hidden>
               <InputLabel shrink htmlFor="input-user-name">
                 Your Name
               </InputLabel>
@@ -72,7 +73,7 @@ export default function RoomNameScreen({ name, roomName, setName, setRoomName, h
               />
             </div>
           )}
-          <div className={classes.textFieldContainer}>
+          <div className={classes.textFieldContainer} hidden>
             <InputLabel shrink htmlFor="input-room-name">
               Room Name
             </InputLabel>
@@ -88,6 +89,24 @@ export default function RoomNameScreen({ name, roomName, setName, setRoomName, h
           </div>
         </div>
         <Grid container justifyContent="flex-end">
+          <Button
+            variant="contained"
+            type="submit"
+            color="secondary"
+            className={`${classes.continueButton}`}
+            onClick={() => {
+              const REACT_APP_URL_NEXT_APP = process.env.REACT_APP_URL_NEXT_APP;
+
+              if (window.location.pathname.includes('doctor')) {
+                window.location.href = `${REACT_APP_URL_NEXT_APP}/doctor`;
+                return;
+              }
+
+              window.location.href = `${REACT_APP_URL_NEXT_APP}`;
+            }}
+          >
+            Return
+          </Button>
           <Button
             variant="contained"
             type="submit"

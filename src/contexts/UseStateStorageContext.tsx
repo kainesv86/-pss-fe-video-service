@@ -58,9 +58,10 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
     axios
       .get(`${REACT_APP_URL_SET_COOKIE}`)
       .then(res => {
-        console.log(res.data);
-        const cookies = new Cookies();
-        const accessToken = cookies.get('access-token');
+        // console.log(res.data);
+        // const cookies = new Cookies();
+        // const accessToken = cookies.get('access-token');
+        const accessToken = res.data['token'];
         localStorage.setItem('access-token', accessToken);
         console.log(accessToken);
       })

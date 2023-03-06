@@ -65,12 +65,12 @@ export const ReactApp = () => (
             <Route path="/login">
               <LoginPage />
             </Route>
-            <Route path="/">
+            {/* <Route path="/">
               {() => {
                 window.location.href = REACT_APP_URL_NEXT_APP;
                 return null;
               }}
-            </Route>
+            </Route> */}
           </Switch>
         </AppStateProvider>
       </Router>

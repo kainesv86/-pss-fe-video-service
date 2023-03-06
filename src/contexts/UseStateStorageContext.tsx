@@ -65,7 +65,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
         console.log(accessToken);
       })
       .catch(err => {
-        window.location.href = `${REACT_APP_URL_NEXT_APP}`;
+        // window.location.href = `${REACT_APP_URL_NEXT_APP}`;
       })
       .finally(() => {
         if (userType === 'doctor') {

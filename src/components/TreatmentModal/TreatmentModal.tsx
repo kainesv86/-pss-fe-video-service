@@ -4,6 +4,8 @@ import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { http } from '../../utils/http';
 import { toast } from 'react-toastify';
+import { useQuery } from '@tanstack/react-query';
+import { Booking } from '../../models/booking';
 
 interface TreatmentModalProps {}
 
@@ -13,9 +15,15 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
   const [level, setLevel] = React.useState('LOW');
   const [note, setNote] = React.useState('');
 
-  const handleSave = () => {
-    const bookingId = window.location.pathname.split('/')[2];
+  const [bookingId, setBookingId] = React.useState('');
+  const [studentId, setStudentId] = React.useState('');
 
+  React.useEffect(() => {
+    const bookingId = window.location.pathname.split('/')[2];
+    setBookingId(bookingId);
+  }, []);
+
+  const handleSave = () => {
     http
       .post(`/appointment`, { bookingId, status: true, level, note })
       .then(res => {
@@ -27,6 +35,33 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
         toast.error('Something went wrong');
       });
   };
+
+  const query = useQuery<Booking>(
+    ['room-info', bookingId],
+    async () => {
+      const res = await http.get(`/bookings/${bookingId}`);
+      setStudentId(res.data.student.id);
+      return res.data;
+    },
+    { initialData: { id: '', cost: 0, student: { id: '' } } as Booking, enabled: Boolean(bookingId) }
+  );
+
+  const appointQuery = useQuery(
+    ['appointment', studentId],
+    async () => {
+      const filter = {
+        studentId,
+        currentPage: 0,
+        pageSize: 4,
+      };
+      const res = await http.get(`/appointments/${studentId}?${JSON.stringify(filter)}`);
+      console.log(res.data);
+      return res.data;
+    },
+    {
+      enabled: Boolean(studentId),
+    }
+  );
 
   return (
     <div className="fixed top-0 left-0 h-full w-full">

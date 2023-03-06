@@ -85,7 +85,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
           // window.location.href = `${REACT_APP_URL_NEXT_APP}/student/auth/login?redirectUrl=${window.location.href}`;
         });
     }
-  }, [accessToken, userType]);
+  }, [accessToken]);
 
   const getCurrentUser = () => {
     if (userType === 'doctor') {

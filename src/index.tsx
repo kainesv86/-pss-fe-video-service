@@ -21,8 +21,11 @@ import UnsupportedBrowserWarning from './components/UnsupportedBrowserWarning/Un
 import { StateStorageProvider } from './contexts';
 import { ModalProvider } from './contexts/ModalContext';
 import { ToastContainer } from 'react-toastify';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 const REACT_APP_URL_NEXT_APP = process.env.REACT_APP_URL_NEXT_APP || 'http://localhost:3000';
+
+const queryClient = new QueryClient();
 
 const VideoApp = () => {
   const { error, setError } = useAppState();
@@ -44,36 +47,38 @@ export const ReactApp = () => (
   <MuiThemeProvider theme={theme}>
     <CssBaseline />
     <UnsupportedBrowserWarning>
-      <Router>
-        <AppStateProvider>
-          <Switch>
-            {/* <PrivateRoute exact path="/">
+      <QueryClientProvider client={queryClient}>
+        <Router>
+          <AppStateProvider>
+            <Switch>
+              {/* <PrivateRoute exact path="/">
               <VideoApp />
             </PrivateRoute> */}
-            <PrivateRoute path="/room/:URLRoomName/doctor">
-              <StateStorageProvider userType={'doctor'}>
-                <ModalProvider>
+              <PrivateRoute path="/room/:URLRoomName/doctor">
+                <StateStorageProvider userType={'doctor'}>
+                  <ModalProvider>
+                    <VideoApp />
+                  </ModalProvider>
+                </StateStorageProvider>
+              </PrivateRoute>
+              <PrivateRoute path="/room/:URLRoomName">
+                <StateStorageProvider userType={'student'}>
                   <VideoApp />
-                </ModalProvider>
-              </StateStorageProvider>
-            </PrivateRoute>
-            <PrivateRoute path="/room/:URLRoomName">
-              <StateStorageProvider userType={'student'}>
-                <VideoApp />
-              </StateStorageProvider>
-            </PrivateRoute>
-            <Route path="/login">
-              <LoginPage />
-            </Route>
-            {/* <Route path="/">
+                </StateStorageProvider>
+              </PrivateRoute>
+              <Route path="/login">
+                <LoginPage />
+              </Route>
+              {/* <Route path="/">
               {() => {
                 window.location.href = REACT_APP_URL_NEXT_APP;
                 return null;
               }}
             </Route> */}
-          </Switch>
-        </AppStateProvider>
-      </Router>
+            </Switch>
+          </AppStateProvider>
+        </Router>
+      </QueryClientProvider>
     </UnsupportedBrowserWarning>
     <ToastContainer />
   </MuiThemeProvider>

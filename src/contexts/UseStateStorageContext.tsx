@@ -76,7 +76,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
               setUser({ ...res.data, userType: 'doctor' });
             })
             .catch(() => {
-              window.location.href = `${REACT_APP_URL_NEXT_APP}/doctor/auth/login?redirectUrl=${window.location.href}`;
+              // window.location.href = `${REACT_APP_URL_NEXT_APP}/doctor/auth/login?redirectUrl=${window.location.href}`;
             });
         }
 
@@ -87,7 +87,7 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
               setUser({ ...res.data, userType: 'student' });
             })
             .catch(() => {
-              window.location.href = `${REACT_APP_URL_NEXT_APP}/student/auth/login?redirectUrl=${window.location.href}`;
+              // window.location.href = `${REACT_APP_URL_NEXT_APP}/student/auth/login?redirectUrl=${window.location.href}`;
             });
         }
       });

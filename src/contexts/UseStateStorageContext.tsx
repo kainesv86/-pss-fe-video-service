@@ -53,45 +53,39 @@ interface Props extends React.PropsWithChildren<StateStorageProviderProps> {}
 
 export const StateStorageProvider = ({ children, userType }: Props) => {
   const [user, setUser] = React.useState<any>({});
+  const [accessToken, setAccessToken] = React.useState<string>('');
+
+  // get token from localhost:3001/room/123-125?token={tokenString} and set to local storage
 
   React.useEffect(() => {
-    axios
-      .get(`${REACT_APP_URL_SET_COOKIE}`)
-      .then(res => {
-        // console.log(res.data);
-        // const cookies = new Cookies();
-        // const accessToken = cookies.get('access-token');
-        const accessToken = res.data['token'];
-        localStorage.setItem('access-token', accessToken);
-        console.log(accessToken);
-      })
-      .catch(err => {
-        // window.location.href = `${REACT_APP_URL_NEXT_APP}`;
-      })
-      .finally(() => {
-        if (userType === 'doctor') {
-          http
-            .get('/doctor/me')
-            .then(res => {
-              setUser({ ...res.data, userType: 'doctor' });
-            })
-            .catch(() => {
-              // window.location.href = `${REACT_APP_URL_NEXT_APP}/doctor/auth/login?redirectUrl=${window.location.href}`;
-            });
-        }
+    const token = new URLSearchParams(window.location.search).get('token') || '';
+    console.log(token);
+    localStorage.setItem('access-token', token);
+    setAccessToken(token);
+  }, []);
 
-        if (userType === 'student') {
-          http
-            .get('/student/me')
-            .then(res => {
-              setUser({ ...res.data, userType: 'student' });
-            })
-            .catch(() => {
-              // window.location.href = `${REACT_APP_URL_NEXT_APP}/student/auth/login?redirectUrl=${window.location.href}`;
-            });
-        }
-      });
-  }, [userType]);
+  React.useEffect(() => {
+    if (userType === 'doctor') {
+      http
+        .get('/doctor/me')
+        .then(res => {
+          setUser({ ...res.data, userType: 'doctor' });
+        })
+        .catch(() => {
+          // window.location.href = `${REACT_APP_URL_NEXT_APP}/doctor/auth/login?redirectUrl=${window.location.href}`;
+        });
+    }
+    if (userType === 'student') {
+      http
+        .get('/student/me')
+        .then(res => {
+          setUser({ ...res.data, userType: 'student' });
+        })
+        .catch(() => {
+          // window.location.href = `${REACT_APP_URL_NEXT_APP}/student/auth/login?redirectUrl=${window.location.href}`;
+        });
+    }
+  }, [accessToken, userType]);
 
   const getCurrentUser = () => {
     if (userType === 'doctor') {

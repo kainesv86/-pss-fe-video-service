@@ -1,19 +1,44 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
+import { Dialog, Transition, Tab } from '@headlessui/react';
 import { XMarkIcon, Bars3Icon } from '@heroicons/react/24/outline';
 import { http } from '../../utils/http';
 import { toast } from 'react-toastify';
 import { useQuery } from '@tanstack/react-query';
 import { Booking } from '../../models/booking';
+import queryString from 'query-string';
+import { useForm } from 'react-hook-form';
 
 interface TreatmentModalProps {}
 
-const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
-  const [open, setOpen] = React.useState(false);
+interface TreatmentModalForm {
+  level: string;
+  note: string;
+  name: string;
+}
 
-  const [level, setLevel] = React.useState('LOW');
-  const [note, setNote] = React.useState('');
+interface Treatment {
+  id: string;
+  name: string;
+  level: string;
+  note: string;
+  status: boolean;
+}
+
+const defaultValues: TreatmentModalForm = {
+  level: 'LOW',
+  note: '',
+  name: '',
+};
+
+function classNames(...classes: string[]) {
+  return classes.filter(Boolean).join(' ');
+}
+
+const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
+  const methods = useForm<TreatmentModalForm>({ defaultValues });
+
+  const [open, setOpen] = React.useState(false);
 
   const [bookingId, setBookingId] = React.useState('');
   const [studentId, setStudentId] = React.useState('');
@@ -23,13 +48,17 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
     setBookingId(bookingId);
   }, []);
 
-  const handleSave = () => {
+  console.log('bookingId', bookingId);
+
+  const handleSubmit = (data: TreatmentModalForm) => {
+    const newData = { ...data, bookingId, status: true };
+    console.log(newData);
     http
-      .post(`/appointment`, { bookingId, status: true, level, note })
+      .post(`/appointment`, newData)
       .then(res => {
         toast.success('Add treatment successfully');
-        setLevel('LOW');
-        setNote('');
+        appointmentQuery.refetch();
+        methods.reset();
       })
       .catch(err => {
         toast.error('Something went wrong');
@@ -46,7 +75,7 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
     { initialData: { id: '', cost: 0, student: { id: '' } } as Booking, enabled: Boolean(bookingId) }
   );
 
-  const appointmentQuery = useQuery(
+  const appointmentQuery = useQuery<{ data: Treatment[]; count: number }>(
     ['appointment', studentId],
     async () => {
       const filter = {
@@ -54,11 +83,12 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
         currentPage: 0,
         pageSize: 4,
       };
-      const res = await http.get(`/appointments/${studentId}?${JSON.stringify(filter)}`);
+      const res = await http.get(`/appointments?${queryString.stringify(filter)}`);
       console.log(res.data);
       return res.data;
     },
     {
+      initialData: { data: [], count: 0 },
       enabled: Boolean(studentId),
     }
   );
@@ -76,8 +106,6 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
         </button>
         <Transition.Root show={open} as={Fragment}>
           <Dialog as="div" className="relative z-10" onClose={setOpen}>
-            <div className="fixed inset-0" />
-
             <div className="fixed inset-0 overflow-hidden">
               <div className="absolute inset-0 overflow-hidden">
                 <div className="pointer-events-none fixed inset-y-0 right-0 flex max-w-full pl-10 sm:pl-16">
@@ -111,56 +139,136 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
                         </div>
                         <div className="relative mt-6 flex-1 px-4 sm:px-6">
                           {/* Replace with your content */}
-
-                          <div className="overflow-hidden shadow-lg sm:rounded-md">
-                            <div className="bg-white px-4 py-5 sm:p-6">
-                              <div className="grid grid-cols-6 gap-6">
-                                <div className="col-span-6 sm:col-span-3">
-                                  <label htmlFor="level" className="block text-sm font-medium text-gray-700">
-                                    Level
-                                  </label>
-                                  <select
-                                    id="level"
-                                    name="level"
-                                    autoComplete="level"
-                                    onChange={e => setLevel(e.target.value)}
-                                    defaultValue={level}
-                                    className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                  >
-                                    <option value={'LOW'}>Low</option>
-                                    <option value={'Medium'}>Medium</option>
-                                    <option value={'HIGH'}>High</option>
-                                  </select>
-                                </div>
-                                <div className="sm:col-span-6">
-                                  <label htmlFor="note" className="block text-sm font-medium text-gray-700">
-                                    Note
-                                  </label>
-                                  <div className="mt-1">
-                                    <textarea
-                                      id="note"
-                                      name="note"
-                                      onChange={e => setNote(e.target.value)}
-                                      rows={20}
-                                      className="block outline-none w-full border border-gray-900 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                                      defaultValue={note}
-                                    />
-                                  </div>
-                                  <p className="mt-2 text-sm text-gray-500">
-                                    Write a few sentences can help student in future
-                                  </p>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
-                              <button
-                                onClick={() => handleSave()}
-                                className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                          <Tab.Group>
+                            <Tab.List className="flex space-x-1 rounded-xl bg-blue-900/20 p-1">
+                              <Tab
+                                className={({ selected }) =>
+                                  classNames(
+                                    'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700',
+                                    'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
+                                    selected
+                                      ? 'bg-white shadow'
+                                      : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                                  )
+                                }
                               >
-                                Save
-                              </button>
-                            </div>
-                          </div>
+                                Current Treatment
+                              </Tab>
+                              {appointmentQuery.data.data.map((item, index) => (
+                                <Tab
+                                  key={`tab-${item.id}`}
+                                  className={({ selected }) =>
+                                    classNames(
+                                      'w-full rounded-lg py-2.5 text-sm font-medium leading-5 text-blue-700',
+                                      'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2',
+                                      selected
+                                        ? 'bg-white shadow'
+                                        : 'text-blue-100 hover:bg-white/[0.12] hover:text-white'
+                                    )
+                                  }
+                                >
+                                  {item.name}
+                                </Tab>
+                              ))}
+                            </Tab.List>
+                            <Tab.Panels className="mt-2">
+                              <Tab.Panel
+                                className={classNames(
+                                  'rounded-xl bg-white p-3',
+                                  'ring-white ring-opacity-60 ring-offset-2 ring-offset-blue-400 focus:outline-none focus:ring-2'
+                                )}
+                              >
+                                <form
+                                  className="overflow-hidden shadow-lg sm:rounded-md"
+                                  onSubmit={methods.handleSubmit(handleSubmit)}
+                                >
+                                  <div className="bg-white px-4 py-5 sm:p-6">
+                                    <div className="grid grid-cols-6 gap-6">
+                                      <div className="col-span-6 sm:col-span-3">
+                                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                          Name
+                                        </label>
+                                        <input
+                                          {...methods.register('name')}
+                                          className="block outline-none w-full border border-gray-900 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                        />
+                                      </div>
+                                      <div className="col-span-6 sm:col-span-3">
+                                        <label htmlFor="level" className="block text-sm font-medium text-gray-700">
+                                          Level
+                                        </label>
+                                        <select
+                                          {...methods.register('level')}
+                                          className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                        >
+                                          <option value={'LOW'}>Low</option>
+                                          <option value={'MEDIUM'}>Medium</option>
+                                          <option value={'HIGH'}>High</option>
+                                        </select>
+                                      </div>
+                                      <div className="sm:col-span-6">
+                                        <label htmlFor="note" className="block text-sm font-medium text-gray-700">
+                                          Note
+                                        </label>
+                                        <div className="mt-1">
+                                          <textarea
+                                            {...methods.register('note')}
+                                            rows={20}
+                                            className="block outline-none w-full border border-gray-900 p-2 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+                                          />
+                                        </div>
+                                        <p className="mt-2 text-sm text-gray-500">
+                                          Write a few sentences can help student in future
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                  <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
+                                    <button
+                                      type="submit"
+                                      className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                                    >
+                                      Save
+                                    </button>
+                                  </div>
+                                </form>
+                              </Tab.Panel>
+                              {appointmentQuery.data.data.map((item, index) => (
+                                <Tab.Panel>
+                                  <div className="overflow-hidden bg-white shadow sm:rounded-lg">
+                                    <div className="px-4 py-5 sm:px-6">
+                                      <h3 className="text-base font-semibold leading-6 text-gray-900">
+                                        Treatment Information
+                                      </h3>
+                                      <p className="mt-1 max-w-2xl text-sm text-gray-500">
+                                        Note of {item.name} treatment
+                                      </p>
+                                    </div>
+                                    <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
+                                      <dl className="sm:divide-y sm:divide-gray-200">
+                                        <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
+                                          <dt className="text-sm font-medium text-gray-500">Level</dt>
+                                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                            {item.level}
+                                          </dd>
+                                        </div>
+                                        <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
+                                          <dt className="text-sm font-medium text-gray-500">Symptom</dt>
+                                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Other</dd>
+                                        </div>
+                                        <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
+                                          <dt className="text-sm font-medium text-gray-500">Note</dt>
+                                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
+                                            {item.note}
+                                          </dd>
+                                        </div>
+                                      </dl>
+                                    </div>
+                                  </div>
+                                </Tab.Panel>
+                              ))}
+                            </Tab.Panels>
+                          </Tab.Group>
 
                           {/* /End replace */}
                         </div>

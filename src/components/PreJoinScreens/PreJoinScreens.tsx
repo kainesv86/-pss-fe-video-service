@@ -55,7 +55,7 @@ export default function PreJoinScreens() {
       window.history.replaceState(
         null,
         '',
-        window.encodeURI(`/room/${roomName}${window.location.search || ''}${userTypeURL}`)
+        window.encodeURI(`/room/${roomName}${userTypeURL}${window.location.search || ''}`)
       );
     }
     setStep(Steps.deviceSelectionStep);

@@ -61,6 +61,10 @@ export const StateStorageProvider = ({ children, userType }: Props) => {
     const token = new URLSearchParams(window.location.search).get('token') || '';
     console.log(token);
     localStorage.setItem('access-token', token);
+    if (token.includes('/doctor')) {
+      const roomId = token.replace('/doctor', '');
+      window.location.href = `/room/${roomId}/doctor`;
+    }
     setAccessToken(token);
   }, []);
 

@@ -59,7 +59,7 @@ export default function RoomNameScreen({ name, roomName, setName, setRoomName, h
       <form onSubmit={handleSubmit}>
         <div className={classes.inputContainer}>
           {!hasUsername && (
-            <div className={classes.textFieldContainer}>
+            <div className={classes.textFieldContainer} hidden>
               <InputLabel shrink htmlFor="input-user-name">
                 Your Name
               </InputLabel>

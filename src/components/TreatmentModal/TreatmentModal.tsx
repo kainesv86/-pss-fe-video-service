@@ -46,7 +46,7 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
     { initialData: { id: '', cost: 0, student: { id: '' } } as Booking, enabled: Boolean(bookingId) }
   );
 
-  const appointQuery = useQuery(
+  const appointmentQuery = useQuery(
     ['appointment', studentId],
     async () => {
       const filter = {

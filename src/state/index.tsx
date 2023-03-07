@@ -102,9 +102,12 @@ export default function AppStateProvider(props: React.PropsWithChildren<{}>) {
           body: JSON.stringify({
             user_identity,
             room_name,
+            bookingId: room_name,
             create_conversation: process.env.REACT_APP_DISABLE_TWILIO_CONVERSATIONS !== 'true',
           }),
-        }).then(res => res.json());
+        })
+          .then(res => res.json())
+          .catch(err => console.log('wtf', err.message));
       },
       updateRecordingRules: async (room_sid, rules) => {
         const endpoint = process.env.REACT_APP_TOKEN_ENDPOINT || '/recordingrules';

@@ -48,7 +48,9 @@ interface VideoProviderProps {
 export function VideoProvider({ options, children, onError = () => {} }: VideoProviderProps) {
   const onErrorCallback: ErrorCallback = useCallback(
     error => {
+      // console.log(`ERROR: ${error.message}`, error);
       console.log(`ERROR: ${error.message}`, error);
+      error.message = `Something went wrong. Please back to home page and try again`;
       onError(error);
     },
     [onError]

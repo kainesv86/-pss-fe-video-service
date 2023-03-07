@@ -47,6 +47,7 @@
     "react-hook-form": "^7.43.5",
     "react-router-dom": "^5.1.2",
     "react-scripts": "5.0.0",
+    "react-select": "^5.7.0",
     "react-toastify": "^9.1.1",
     "rimraf": "3.0.2",
     "strip-color": "^0.1.0",

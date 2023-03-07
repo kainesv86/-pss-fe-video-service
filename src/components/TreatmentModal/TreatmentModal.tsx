@@ -8,6 +8,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Booking } from '../../models/booking';
 import queryString from 'query-string';
 import { useForm } from 'react-hook-form';
+import Select from 'react-select';
 
 interface TreatmentModalProps {}
 
@@ -15,6 +16,7 @@ interface TreatmentModalForm {
   level: string;
   note: string;
   name: string;
+  symptomIds: string[];
 }
 
 interface Treatment {
@@ -23,12 +25,23 @@ interface Treatment {
   level: string;
   note: string;
   status: boolean;
+  symptoms: Symptom[];
+}
+
+interface Symptom {
+  id: string;
+  name: string;
+  category: {
+    id: string;
+    name: string;
+  };
 }
 
 const defaultValues: TreatmentModalForm = {
   level: 'LOW',
   note: '',
   name: '',
+  symptomIds: [],
 };
 
 function classNames(...classes: string[]) {
@@ -43,6 +56,8 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
   const [bookingId, setBookingId] = React.useState('');
   const [studentId, setStudentId] = React.useState('');
 
+  const [selectedSymptoms, setSelectedSymptoms] = React.useState<string[]>([]);
+
   React.useEffect(() => {
     const bookingId = window.location.pathname.split('/')[2];
     setBookingId(bookingId);
@@ -51,7 +66,7 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
   console.log('bookingId', bookingId);
 
   const handleSubmit = (data: TreatmentModalForm) => {
-    const newData = { ...data, bookingId, status: true };
+    const newData = { ...data, bookingId, status: true, symptomIds: selectedSymptoms };
     console.log(newData);
     http
       .post(`/appointment`, newData)
@@ -84,6 +99,23 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
         pageSize: 4,
       };
       const res = await http.get(`/appointments?${queryString.stringify(filter)}`);
+      console.log(res.data);
+      return res.data;
+    },
+    {
+      initialData: { data: [], count: 0 },
+      enabled: Boolean(studentId),
+    }
+  );
+
+  const symptomsQuery = useQuery<{ data: Symptom[]; count: number }>(
+    ['symptoms'],
+    async () => {
+      const filter = {
+        currentPage: 0,
+        pageSize: 1000,
+      };
+      const res = await http.get(`/symptoms?${queryString.stringify(filter)}`);
       console.log(res.data);
       return res.data;
     },
@@ -206,6 +238,21 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
                                           <option value={'HIGH'}>High</option>
                                         </select>
                                       </div>
+                                      <div className="col-span-12 sm:col-span-6">
+                                        <label htmlFor="level" className="block text-sm font-medium text-gray-700">
+                                          Symptom
+                                        </label>
+                                        <Select
+                                          onChange={value => setSelectedSymptoms(value.map(item => item.value))}
+                                          options={symptomsQuery.data.data.map(item => ({
+                                            label: item.name,
+                                            value: item.id,
+                                          }))}
+                                          isMulti
+                                          className="basic-multi-select"
+                                          classNamePrefix="select"
+                                        />
+                                      </div>
                                       <div className="sm:col-span-6">
                                         <label htmlFor="note" className="block text-sm font-medium text-gray-700">
                                           Note
@@ -247,17 +294,21 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
                                     <div className="border-t border-gray-200 px-4 py-5 sm:p-0">
                                       <dl className="sm:divide-y sm:divide-gray-200">
                                         <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
-                                          <dt className="text-sm font-medium text-gray-500">Level</dt>
+                                          <dt className="text-sm font-semibold text-gray-900">Level</dt>
                                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                                             {item.level}
                                           </dd>
                                         </div>
                                         <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
-                                          <dt className="text-sm font-medium text-gray-500">Symptom</dt>
-                                          <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">Other</dd>
+                                          <dt className="text-sm font-semibold text-gray-900">Symptoms</dt>
+                                          <dd className="mt-1 text-sm text-gray-900 flex flex-col sm:col-span-2 sm:mt-0">
+                                            {item.symptoms.length
+                                              ? item.symptoms.map(item => <span>{item.name}</span>)
+                                              : 'Other'}
+                                          </dd>
                                         </div>
                                         <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4 sm:py-5 sm:px-6">
-                                          <dt className="text-sm font-medium text-gray-500">Note</dt>
+                                          <dt className="text-sm font-semibold text-gray-900">Note</dt>
                                           <dd className="mt-1 text-sm text-gray-900 sm:col-span-2 sm:mt-0">
                                             {item.note}
                                           </dd>

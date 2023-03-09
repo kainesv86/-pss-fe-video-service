@@ -63,8 +63,6 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
     setBookingId(bookingId);
   }, []);
 
-  console.log('bookingId', bookingId);
-
   const handleSubmit = (data: TreatmentModalForm) => {
     const newData = { ...data, bookingId, status: true, symptomIds: selectedSymptoms };
     console.log(newData);
@@ -73,6 +71,7 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
       .then(res => {
         toast.success('Add treatment successfully');
         appointmentQuery.refetch();
+        setSelectedSymptoms([]);
         methods.reset();
       })
       .catch(err => {

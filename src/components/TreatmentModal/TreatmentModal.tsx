@@ -96,6 +96,7 @@ const TreatmentModal: React.FunctionComponent<TreatmentModalProps> = () => {
         studentId,
         currentPage: 0,
         pageSize: 4,
+        order: 'DESC',
         orderBy: 'createAt',
       };
       const res = await http.get(`/appointments?${queryString.stringify(filter)}`);
